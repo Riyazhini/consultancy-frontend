@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Search, X, AlertCircle, Loader2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, X, AlertCircle, Loader2, Mail, Phone } from 'lucide-react';
 import api from '../services/api';
 
 export default function Customers() {
@@ -10,7 +10,7 @@ export default function Customers() {
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentCustomer, setCurrentCustomer] = useState({ name: '', phone: '', address: '' });
+  const [currentCustomer, setCurrentCustomer] = useState({ name: '', email: '', phone: '', address: '' });
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
@@ -30,15 +30,20 @@ export default function Customers() {
   };
 
   const validateForm = (customerData) => {
-    const nameRegex = /^[a-zA-Z\s]{2,50}$/;
-    const phoneRegex = /^\d{10}$/;
+    const nameRegex = /^[a-zA-Z\s]{2,25}$/;
+    const emailRegex = /^[a-zA-Z0-9._%-]+@gmail\.com$/;
+    const phoneRegex = /^[6-9]\d{9}$/;
 
     if (!nameRegex.test(customerData.name)) {
-      setValidationError('Invalid name. Use letters and spaces (2-50 characters).');
+      setValidationError('Invalid name. Use only letters and spaces (2-25 characters).');
+      return false;
+    }
+    if (!emailRegex.test(customerData.email)) {
+      setValidationError('Invalid email. Must be a Gmail address (@gmail.com).');
       return false;
     }
     if (!phoneRegex.test(customerData.phone)) {
-      setValidationError('Invalid phone. Must be exactly 10 digits.');
+      setValidationError('Invalid phone. Must be 10 digits starting with 6-9.');
       return false;
     }
     setValidationError('');
@@ -60,7 +65,7 @@ export default function Customers() {
         await api.post('/customers', currentCustomer);
       }
       setIsModalOpen(false);
-      setCurrentCustomer({ name: '', phone: '', address: '' });
+      setCurrentCustomer({ name: '', email: '', phone: '', address: '' });
       fetchCustomers();
     } catch (error) {
       console.error('Failed to save customer:', error);
@@ -81,7 +86,7 @@ export default function Customers() {
 
   const openAddModal = () => {
     setIsEditing(false);
-    setCurrentCustomer({ name: '', phone: '', address: '' });
+    setCurrentCustomer({ name: '', email: '', phone: '', address: '' });
     setValidationError('');
     setIsModalOpen(true);
   };
@@ -153,6 +158,9 @@ export default function Customers() {
                       Name
                     </th>
                     <th scope="col" className="px-3 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                       Phone Number
                     </th>
                     <th scope="col" className="px-3 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -166,7 +174,7 @@ export default function Customers() {
                 <tbody className="divide-y divide-gray-100">
                   {filteredCustomers.length === 0 ? (
                     <tr>
-                      <td colSpan="4" className="text-center py-10 text-gray-500">No customers found.</td>
+                      <td colSpan="5" className="text-center py-10 text-gray-500">No customers found.</td>
                     </tr>
                   ) : (
                     filteredCustomers.map((customer) => (
@@ -174,6 +182,7 @@ export default function Customers() {
                         <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
                           {customer.name}
                         </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{customer.email}</td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{customer.phone}</td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 truncate max-w-xs">{customer.address || '-'}</td>
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
@@ -228,8 +237,8 @@ export default function Customers() {
                 <input
                   type="text"
                   required
-                  pattern="^[a-zA-Z\s]{2,50}$"
-                  title="Letters and spaces only, 2-50 characters"
+                  pattern="^[a-zA-Z\s]{2,25}$"
+                  title="Letters and spaces only, 2-25 characters"
                   className="block w-full rounded-lg border-gray-300 py-2.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-theme-primary sm:text-sm px-3"
                   value={currentCustomer.name}
                   onChange={(e) => setCurrentCustomer({...currentCustomer, name: e.target.value})}
@@ -237,17 +246,36 @@ export default function Customers() {
                 />
               </div>
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    type="email"
+                    required
+                    pattern="^[a-zA-Z0-9._%-]+@gmail\.com$"
+                    title="Must be a Gmail address (@gmail.com)"
+                    className="block w-full pl-10 pr-4 py-2.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-theme-primary sm:text-sm rounded-lg"
+                    value={currentCustomer.email}
+                    onChange={(e) => setCurrentCustomer({...currentCustomer, email: e.target.value})}
+                    placeholder="example@gmail.com"
+                  />
+                </div>
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                <input
-                  type="text"
-                  required
-                  pattern="\d{10}"
-                  title="Exactly 10 digits"
-                  className="block w-full rounded-lg border-gray-300 py-2.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-theme-primary sm:text-sm px-3"
-                  value={currentCustomer.phone}
-                  onChange={(e) => setCurrentCustomer({...currentCustomer, phone: e.target.value})}
-                  placeholder=""
-                />
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    type="tel"
+                    required
+                    pattern="^[6-9]\d{9}$"
+                    title="Must be 10 digits starting with 6-9"
+                    className="block w-full pl-10 pr-4 py-2.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-theme-primary sm:text-sm rounded-lg"
+                    value={currentCustomer.phone}
+                    onChange={(e) => setCurrentCustomer({...currentCustomer, phone: e.target.value})}
+                    placeholder=""
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Address (Optional)</label>

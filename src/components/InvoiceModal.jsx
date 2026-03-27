@@ -3,14 +3,10 @@ import {
   X, 
   Printer, 
   Download, 
-  CheckCircle2, 
   Phone, 
   Mail, 
   MapPin, 
   Info,
-  Banknote,
-  CreditCard,
-  Smartphone,
   User
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
@@ -37,15 +33,6 @@ export default function InvoiceModal({ bill, onClose, preview = false }) {
     pdf.save(`Invoice-${bill.invoiceNumber || 'BILL'}.pdf`);
   };
 
-  const getPaymentIcon = (method) => {
-    switch(method) {
-      case 'Cash': return <Banknote className="h-4 w-4" />;
-      case 'UPI': return <Smartphone className="h-4 w-4" />;
-      case 'Card': return <CreditCard className="h-4 w-4" />;
-      default: return null;
-    }
-  };
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto modal-overlay">
       <div className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl flex flex-col max-h-[95vh] overflow-hidden">
@@ -61,20 +48,24 @@ export default function InvoiceModal({ bill, onClose, preview = false }) {
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={handlePrint}
-              className="group flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm"
-            >
-              <Printer className="h-4 w-4 text-gray-400 group-hover:text-theme-primary" />
-              Print
-            </button>
-            <button
-              onClick={handleDownloadPDF}
-              className="flex items-center gap-2 px-4 py-2 bg-theme-secondary text-white rounded-xl text-sm font-bold hover:bg-theme-hover shadow-lg shadow-theme-secondary/20 transition-all"
-            >
-              <Download className="h-4 w-4" />
-              Download PDF
-            </button>
+            {!preview && (
+              <>
+                <button
+                  onClick={handlePrint}
+                  className="group flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm"
+                >
+                  <Printer className="h-4 w-4 text-gray-400 group-hover:text-theme-primary" />
+                  Print
+                </button>
+                <button
+                  onClick={handleDownloadPDF}
+                  className="flex items-center gap-2 px-4 py-2 bg-theme-secondary text-white rounded-xl text-sm font-bold hover:bg-theme-hover shadow-lg shadow-theme-secondary/20 transition-all"
+                >
+                  <Download className="h-4 w-4" />
+                  Download PDF
+                </button>
+              </>
+            )}
             <button
               onClick={onClose}
               className="ml-2 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
@@ -179,25 +170,13 @@ export default function InvoiceModal({ bill, onClose, preview = false }) {
               </div>
             </div>
 
-            {/* Payment & Footer */}
-            <div className="mt-16 pt-8 border-t border-gray-100 flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Payment Method:</p>
-                <div className="flex items-center gap-1.5 text-xs font-black text-gray-900 uppercase">
-                  {getPaymentIcon(bill.paymentMethod)}
-                  {bill.paymentMethod}
-                </div>
+            {/* Footer */}
+            <div className="mt-16 pt-8 border-t border-gray-100">
+              <div className="mt-16 text-center">
+                <p className="text-xs font-black text-gray-900 uppercase tracking-widest mb-1">Thank you for your business!</p>
+                <p className="text-[10px] text-gray-400 leading-tight">This is a computer generated invoice and does not require a physical signature.</p>
+                <p className="text-[9px] font-bold text-theme-primary uppercase tracking-[0.3em] mt-8">Lumo Industries &copy; 2026</p>
               </div>
-              <div className="px-4 py-1.5 bg-green-500 text-white rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                <CheckCircle2 className="h-3 w-3" />
-                Fully Paid
-              </div>
-            </div>
-
-            <div className="mt-16 text-center">
-              <p className="text-xs font-black text-gray-900 uppercase tracking-widest mb-1">Thank you for your business!</p>
-              <p className="text-[10px] text-gray-400 leading-tight">This is a computer generated invoice and does not require a physical signature.</p>
-              <p className="text-[9px] font-bold text-theme-primary uppercase tracking-[0.3em] mt-8">Lumo Industries &copy; 2026</p>
             </div>
           </div>
         </div>

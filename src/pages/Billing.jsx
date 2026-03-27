@@ -244,40 +244,51 @@ export default function Billing() {
     if (!selectedCustomerId) return alert("Please select a customer.");
     if (items.length === 0) return alert("Please add at least one product.");
 
-    setIsSubmitting(true);
-    try {
-      const payload = {
-        customer: selectedCustomerId,
-        items: items.map(i => ({
-          product: i.productId,
-          quantity: i.quantity,
-          price: i.price
-        })),
-        subTotal,
-        tax,
-        discount,
-        totalAmount: finalTotal,
-        paymentMethod
-      };
+    // 👉 FAKE PAYMENT START
+    alert("Processing Payment...");
 
-      const { data } = await api.post('/bills/create', payload);
-      setGeneratedBill(data);
-      setIsPreviewMode(false);
-      setShowInvoiceModal(true);
-      setSuccessMessage(`Invoice ${data.invoiceNumber} generated!`);
-      
-      // Reset form ONLY on success
-      setItems([]);
-      setSelectedCustomerId('');
-      setCustomerSearch('');
-      setDiscount(0);
-      fetchInitialData(); // Refresh stock and next invoice number
-      setTimeout(() => setSuccessMessage(''), 5000);
-    } catch (error) {
-      alert(error.response?.data?.message || "Failed to generate bill.");
-    } finally {
-      setIsSubmitting(false);
-    }
+    setTimeout(async () => {
+      setIsSubmitting(true);
+
+      try {
+        const payload = {
+          customer: selectedCustomerId,
+          items: items.map(i => ({
+            product: i.productId,
+            quantity: i.quantity,
+            price: i.price
+          })),
+          subTotal,
+          tax,
+          discount,
+          totalAmount: finalTotal,
+          paymentMethod,
+          paymentId: "PAY" + Date.now(), // 🔥 fake payment id
+          paymentStatus: "SUCCESS"
+        };
+
+        const { data } = await api.post('/bills/create', payload);
+
+        setGeneratedBill(data);
+        setIsPreviewMode(false);
+        setShowInvoiceModal(true);
+        setSuccessMessage(`Payment Successful ✅ Invoice ${data.invoiceNumber} generated!`);
+
+        // Reset form ONLY on success
+        setItems([]);
+        setSelectedCustomerId('');
+        setCustomerSearch('');
+        setDiscount(0);
+        fetchInitialData();
+
+        setTimeout(() => setSuccessMessage(''), 5000);
+
+      } catch (error) {
+        alert(error.response?.data?.message || "Payment failed.");
+      } finally {
+        setIsSubmitting(false);
+      }
+    }, 2000); // ⏳ delay for realism
   };
 
   if (loadingInitial) {
